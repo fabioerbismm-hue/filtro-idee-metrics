@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filtro Idee — Metrics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0A0A0A;
+    --lime: #AAFF00;
+    --white: #FFFFFF;
+    --gray-100: #F5F5F5;
+    --gray-200: #E8E8E8;
+    --gray-400: #AAAAAA;
+    --gray-600: #666666;
+    --green: #1D9E75;
+    --amber: #EF9F27;
+    --coral: #D85A30;
+    --red: #E24B4A;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .page-header {
+    border-bottom: 1px solid #1A1A1A;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--lime);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--gray-400); }
+
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-400);
+    border: 1px solid #2A2A2A;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+  }
+
+  .hero { margin-bottom: 3rem; }
+
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    color: var(--white);
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--lime);
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--gray-400);
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  .idea-field {
+    margin-bottom: 2.5rem;
+  }
+
+  .field-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-400);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .idea-input {
+    width: 100%;
+    background: #111111;
+    border: 1px solid #2A2A2A;
+    border-radius: 4px;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--white);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .idea-input::placeholder { color: #444; }
+  .idea-input:focus { border-color: #444; }
+
+  .questions { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.5rem; }
+
+  .q-block {
+    background: #111111;
+    border: 1px solid #1E1E1E;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .q-block.answered { border-color: #2A2A2A; }
+
+  .q-header {
+    padding: 1.25rem 1.25rem 0;
+  }
+
+  .q-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--lime);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .q-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    line-height: 1.5;
+    padding-bottom: 1rem;
+  }
+
+  .options {
+    border-top: 1px solid #1E1E1E;
+  }
+
+  .opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 1.25rem;
+    cursor: pointer;
+    border-bottom: 1px solid #1A1A1A;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .opt:last-child { border-bottom: none; }
+  .opt:hover { background: #171717; }
+
+  .opt.selected {
+    background: #161A0F;
+  }
+
+  .opt.selected::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--lime);
+  }
+
+  .opt input[type="radio"] {
+    margin-top: 3px;
+    flex-shrink: 0;
+    accent-color: var(--lime);
+    width: 14px;
+    height: 14px;
+  }
+
+  .opt-text {
+    font-size: 14px;
+    color: #CCCCCC;
+    line-height: 1.5;
+  }
+
+  .opt.selected .opt-text { color: var(--white); }
+
+  .btn-analyze {
+    width: 100%;
+    padding: 16px;
+    background: var(--lime);
+    color: var(--black);
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-analyze:hover:not(:disabled) { opacity: 0.88; }
+  .btn-analyze:active:not(:disabled) { transform: scale(0.99); }
+  .btn-analyze:disabled { opacity: 0.2; cursor: not-allowed; }
+
+  /* RESULT */
+  .result-panel {
+    display: none;
+    margin-top: 2.5rem;
+    border: 1px solid #2A2A2A;
+    border-radius: 6px;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-top {
+    padding: 1.75rem;
+    border-bottom: 1px solid #1E1E1E;
+  }
+
+  .result-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+  }
+
+  .tag-green { background: #0F2E1F; color: #AAFF00; }
+  .tag-amber { background: #2E1F0A; color: #EF9F27; }
+  .tag-coral { background: #2E150A; color: #F09575; }
+  .tag-red { background: #2E0F0F; color: #F09595; }
+
+  .result-verdict {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .result-sub {
+    font-size: 14px;
+    color: var(--gray-400);
+    line-height: 1.6;
+  }
+
+  .score-section {
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid #1E1E1E;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .score-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--white);
+    min-width: 56px;
+  }
+
+  .score-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: #222;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .score-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #444;
+    letter-spacing: 0.06em;
+  }
+
+  .breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #1A1A1A;
+    border-bottom: 1px solid #1E1E1E;
+  }
+
+  .bk-item {
+    background: #111;
+    padding: 1rem 1.25rem;
+  }
+
+  .bk-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .bk-val {
+    font-size: 13px;
+    font-weight: 500;
+    color: #CCC;
+  }
+
+  .result-note {
+    padding: 1.5rem 1.75rem;
+    font-size: 14px;
+    color: var(--gray-400);
+    line-height: 1.8;
+    border-bottom: 1px solid #1E1E1E;
+  }
+
+  .result-note strong { color: var(--white); font-weight: 500; }
+
+  .btn-reset {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: #555;
+    border: none;
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+
+  .btn-reset:hover { color: var(--gray-400); }
+
+  .footer {
+    margin-top: 5rem;
+    border-top: 1px solid #1A1A1A;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #333;
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 2rem 1.25rem 4rem; }
+    .hero h1 { font-size: 24px; }
+    .breakdown { grid-template-columns: 1fr; }
+    .page-header { padding: 1rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="logo">Metrics <span>/ Filtro Idee</span></div>
+  <div class="badge">v1.0</div>
+</header>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>Ogni idea<br>passa dal <em>filtro.</em></h1>
+    <p>Quattro domande operative per decidere se un'idea entra in agenda adesso, aspetta, o viene parcheggiata. Vale per entrambi i soci.</p>
+  </div>
+
+  <div class="idea-field">
+    <label class="field-label" for="idea-name">Nome dell'idea</label>
+    <input class="idea-input" id="idea-name" type="text" placeholder="es. Consorzio online B2B con Alma">
+  </div>
+
+  <div class="questions">
+
+    <div class="q-block" id="block-q1">
+      <div class="q-header">
+        <span class="q-num">01 — Eseguibilità</span>
+        <div class="q-text">Cosa richiede concretamente nei prossimi 30 giorni?</div>
+      </div>
+      <div class="options">
+        <label class="opt"><input type="radio" name="q1" value="1"><span class="opt-text">Non riesco ancora a stimare le ore e le risorse necessarie</span></label>
+        <label class="opt"><input type="radio" name="q1" value="2"><span class="opt-text">Richiede molte ore da entrambi i soci e risorse non disponibili ora</span></label>
+        <label class="opt"><input type="radio" name="q1" value="3"><span class="opt-text">Richiede alcune ore ma si può integrare nel lavoro corrente</span></label>
+        <label class="opt"><input type="radio" name="q1" value="4"><span class="opt-text">Richiede poco tempo, risorse già disponibili, può partire subito</span></label>
+      </div>
+    </div>
+
+    <div class="q-block" id="block-q2">
+      <div class="q-header">
+        <span class="q-num">02 — Impatto sui progetti</span>
+        <div class="q-text">Quale progetto attivo rallenterebbe per fare spazio a questa idea?</div>
+      </div>
+      <div class="options">
+        <label class="opt"><input type="radio" name="q2" value="1"><span class="opt-text">Rallenterebbe un cliente o progetto attivo in fase critica</span></label>
+        <label class="opt"><input type="radio" name="q2" value="2"><span class="opt-text">Rallenterebbe un progetto importante ma non in fase critica</span></label>
+        <label class="opt"><input type="radio" name="q2" value="3"><span class="opt-text">Rallenterebbe solo attività secondarie o pianificate in futuro</span></label>
+        <label class="opt"><input type="radio" name="q2" value="4"><span class="opt-text">Non rallenterebbe nulla di esistente</span></label>
+      </div>
+    </div>
+
+    <div class="q-block" id="block-q3">
+      <div class="q-header">
+        <span class="q-num">03 — Urgenza reale</span>
+        <div class="q-text">Perché adesso e non tra 60 giorni?</div>
+      </div>
+      <div class="options">
+        <label class="opt"><input type="radio" name="q3" value="1"><span class="opt-text">Non c'è un motivo specifico per farlo adesso</span></label>
+        <label class="opt"><input type="radio" name="q3" value="2"><span class="opt-text">Sarebbe utile prima, ma potrebbe aspettare senza grossi danni</span></label>
+        <label class="opt"><input type="radio" name="q3" value="3"><span class="opt-text">C'è una finestra di opportunità che si chiude entro 30-60 giorni</span></label>
+        <label class="opt"><input type="radio" name="q3" value="4"><span class="opt-text">C'è una scadenza o opportunità concreta e verificabile entro 2 settimane</span></label>
+      </div>
+    </div>
+
+    <div class="q-block" id="block-q4">
+      <div class="q-header">
+        <span class="q-num">04 — Misurabilità</span>
+        <div class="q-text">Qual è il segnale che ci dice che sta funzionando nei primi 30 giorni?</div>
+      </div>
+      <div class="options">
+        <label class="opt"><input type="radio" name="q4" value="1"><span class="opt-text">Non sappiamo ancora come misurarlo</span></label>
+        <label class="opt"><input type="radio" name="q4" value="2"><span class="opt-text">Abbiamo un'idea vaga ma non un numero o evento preciso</span></label>
+        <label class="opt"><input type="radio" name="q4" value="3"><span class="opt-text">Abbiamo un indicatore chiaro, anche se non ancora formalizzato</span></label>
+        <label class="opt"><input type="radio" name="q4" value="4"><span class="opt-text">Abbiamo un segnale preciso e misurabile già definito</span></label>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="btn-analyze" id="btn-go" disabled onclick="analyze()">Analizza idea →</button>
+
+  <div class="result-panel" id="result-panel">
+    <div class="result-top">
+      <div class="result-tag" id="result-tag"></div>
+      <div class="result-verdict" id="result-verdict"></div>
+      <div class="result-sub" id="result-sub"></div>
+    </div>
+    <div class="score-section">
+      <div class="score-row">
+        <div class="score-num" id="score-num">0%</div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="score-fill"></div></div>
+      </div>
+      <div class="score-labels"><span>non pronta</span><span>pronta</span></div>
+    </div>
+    <div class="breakdown">
+      <div class="bk-item"><div class="bk-label">Eseguibilità ora</div><div class="bk-val" id="bk1"></div></div>
+      <div class="bk-item"><div class="bk-label">Impatto sui progetti</div><div class="bk-val" id="bk2"></div></div>
+      <div class="bk-item"><div class="bk-label">Urgenza reale</div><div class="bk-val" id="bk3"></div></div>
+      <div class="bk-item"><div class="bk-label">Misurabilità</div><div class="bk-val" id="bk4"></div></div>
+    </div>
+    <div class="result-note" id="result-note"></div>
+    <button class="btn-reset" onclick="reset()">← valuta un'altra idea</button>
+  </div>
+
+</div>
+
+<footer class="footer">Metrics — uso interno — filtro idee operative</footer>
+
+<script>
+  const radios = document.querySelectorAll('input[type="radio"]');
+  radios.forEach(r => {
+    r.addEventListener('change', function() {
+      document.querySelectorAll('input[name="' + this.name + '"]').forEach(x => {
+        x.closest('.opt').classList.remove('selected');
+      });
+      this.closest('.opt').classList.add('selected');
+      document.getElementById('block-' + this.name).classList.add('answered');
+      checkReady();
+    });
+  });
+
+  function checkReady() {
+    const all = ['q1','q2','q3','q4'].every(q => document.querySelector('input[name="' + q + '"]:checked'));
+    document.getElementById('btn-go').disabled = !all;
+  }
+
+  function analyze() {
+    const scores = ['q1','q2','q3','q4'].map(q => parseInt(document.querySelector('input[name="' + q + '"]:checked').value));
+    const total = scores.reduce((a,b) => a+b, 0);
+    const pct = Math.round((total / 16) * 100);
+
+    const bkLabels = [
+      ['Non stimabile','Richiede troppo','Integrabile','Subito fattibile'],
+      ['Blocca critici','Rallenta progetti','Impatto basso','Nessun impatto'],
+      ['Nessuna urgenza','Bassa urgenza','Finestra aperta','Urgenza reale'],
+      ['Non misurabile','Vaga','Indicatore chiaro','KPI definito']
+    ];
+
+    scores.forEach((s,i) => {
+      document.getElementById('bk'+(i+1)).textContent = bkLabels[i][s-1];
+    });
+
+    document.getElementById('score-num').textContent = pct + '%';
+
+    let verdict, sub, note, tagText, tagClass, fillColor;
+
+    if (pct >= 75) {
+      verdict = 'Idea pronta per entrare in agenda';
+      sub = 'Le condizioni operative ci sono. Ha senso pianificarla adesso.';
+      tagText = 'VIA LIBERA';
+      tagClass = 'tag-green';
+      fillColor = '#AAFF00';
+      note = '<strong>Cosa fare:</strong> Definire un owner, un obiettivo a 30 giorni e una data di inizio. Integrare nel piano operativo della settimana prossima.';
+    } else if (pct >= 55) {
+      verdict = "Idea interessante, ma non ancora pronta";
+      sub = 'Uno o due nodi da sciogliere prima di partire.';
+      tagText = 'IN ATTESA';
+      tagClass = 'tag-amber';
+      fillColor = '#EF9F27';
+      note = '<strong>Cosa fare:</strong> Identificare il punto debole specifico (di solito urgenza o misurabilità) e definire quando tornarci. Inserire una data di revisione nel piano — non ignorarla, solo parcheggiare.';
+    } else if (pct >= 35) {
+      verdict = 'Troppo presto per portarla in agenda';
+      sub = "L'idea esiste, ma mancano le condizioni per valutarla concretamente.";
+      tagText = 'DA RIMANDARE';
+      tagClass = 'tag-coral';
+      fillColor = '#D85A30';
+      note = '<strong>Cosa fare:</strong> Archiviarla in un backlog condiviso con una nota su cosa manca. Tornare a valutarla solo quando almeno due dei quattro punti cambiano. Non bloccare l\'operatività attuale per svilupparla.';
+    } else {
+      verdict = "Non è ancora un'idea, è ancora una visione";
+      sub = 'Non ha la forma necessaria per diventare un progetto operativo.';
+      tagText = 'NON ORA';
+      tagClass = 'tag-red';
+      fillColor = '#E24B4A';
+      note = "<strong>Cosa fare:</strong> Lasciarla decantare. Se è una buona idea, tornerà in modo più concreto. Se nel frattempo scompare, era prematura. Non spendere energie su qualcosa che non ha ancora un 'perché adesso' e un 'come si misura'.";
+    }
+
+    const tag = document.getElementById('result-tag');
+    tag.textContent = tagText;
+    tag.className = 'result-tag ' + tagClass;
+
+    document.getElementById('result-verdict').textContent = verdict;
+    document.getElementById('result-sub').textContent = sub;
+    document.getElementById('result-note').innerHTML = note;
+
+    const fill = document.getElementById('score-fill');
+    fill.style.background = fillColor;
+    setTimeout(() => { fill.style.width = pct + '%'; }, 80);
+
+    const panel = document.getElementById('result-panel');
+    panel.style.display = 'block';
+    setTimeout(() => { panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+  }
+
+  function reset() {
+    document.getElementById('idea-name').value = '';
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.q-block').forEach(b => b.classList.remove('answered'));
+    document.getElementById('result-panel').style.display = 'none';
+    document.getElementById('score-fill').style.width = '0%';
+    document.getElementById('btn-go').disabled = true;
+    window.scrollTo({ behavior: 'smooth', top: 0 });
+  }
+</script>
+
+</body>
+</html>
